@@ -1,16 +1,4 @@
-# Talat K frontend
-
-Next.js frontend for the Talat K NLP coaching and booking app.
-
-## Netlify deployment
-
-The repository root contains `netlify.toml`, configured to build this directory automatically:
-
-- Build command: `npm run build`
-- Publish directory: `.next`
-- Node.js: 22
-
-In Netlify, add `NEXT_PUBLIC_API_URL=https://your-backend.onrender.com` under **Site configuration > Environment variables**. The backend must allow the deployed Netlify URL through its `FRONTEND_URL` setting. Do not upload `.env.local` or any backend `.env` file.
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
 

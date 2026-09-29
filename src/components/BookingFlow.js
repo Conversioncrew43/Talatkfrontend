@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, CalendarDays, Check, Clock3, LockKeyhole, Mail, Video } from "lucide-react";
-import { apiRequest, formatDate, formatPrice, formatTime, getServiceTitle, getSlot } from "@/lib/api";
+import { API_BASE_URL, apiRequest, formatDate, formatPrice, formatTime, getServiceTitle, getSlot } from "@/lib/api";
 
 const STORAGE_KEY = "talat-booking-flow";
 const progressItems = ["Time", "Details", "Review", "Confirmed"];
@@ -308,7 +308,7 @@ export default function BookingFlow() {
           </ol>
 
           {error && <p className="booking-error" role="alert">{error}</p>}
-          {serviceError && stage === "time" && <p className="booking-error" role="alert">{serviceError} Make sure the booking API is running and available at {process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:4000"}.</p>}
+          {serviceError && stage === "time" && <p className="booking-error" role="alert">{serviceError} Make sure the booking API is running and available at {API_BASE_URL}.</p>}
 
           {stage === "time" && (
             <div className="booking-panel">

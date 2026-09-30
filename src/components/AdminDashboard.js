@@ -90,6 +90,21 @@ export default function AdminDashboard() {
     window.location.assign("/");
   }
 
+  const recentBookings = useMemo(
+    () => bookings
+      .filter((booking) => booking.status === "confirmed")
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+      .slice(0, 8),
+    [bookings]
+  );
+
+  const transactionBookings = useMemo(
+    () => bookings
+      .slice()
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)),
+    [bookings]
+  );
+
   const stats = useMemo(() => {
     const revenue = bookings
       .filter((booking) => booking.paymentStatus === "paid")
@@ -436,11 +451,11 @@ export default function AdminDashboard() {
                 <p className="booking-eyebrow">BOOKING TRACKER</p>
                 <h2>Recent bookings</h2>
               </div>
-              <span className="admin-panel-pill">{bookings.length} total</span>
+              <span className="admin-panel-pill">{recentBookings.length} confirmed</span>
             </div>
 
             <div className="admin-booking-list">
-              {bookings.slice(0, 8).map((booking) => (
+              {recentBookings.length ? recentBookings.map((booking) => (
                 <div className="admin-booking-row" key={booking._id}>
                   <div>
                     <strong>{booking.clientId?.name || "Client"}</strong>
@@ -452,7 +467,7 @@ export default function AdminDashboard() {
                     <small>{formatPrice(booking.amount)}</small>
                   </div>
                 </div>
-              ))}
+              )) : <p className="dashboard-muted">No confirmed bookings yet.</p>}
             </div>
 
             <div className="admin-meet-panel">
@@ -464,6 +479,33 @@ export default function AdminDashboard() {
               <span className="admin-meet-status">Ready for the next build</span>
             </div>
           </article>
+        </section>
+
+        <section className="admin-panel admin-transactions-panel">
+          <div className="dashboard-section-heading">
+            <div>
+              <p className="booking-eyebrow">TRANSACTIONS</p>
+              <h2>All booking activity</h2>
+            </div>
+            <span className="admin-panel-pill">{bookings.length} entries</span>
+          </div>
+
+          <div className="admin-booking-list admin-transactions-list">
+            {transactionBookings.length ? transactionBookings.map((booking) => (
+              <div className="admin-booking-row admin-transaction-row" key={booking._id}>
+                <div>
+                  <strong>{booking.clientId?.name || "Client"}</strong>
+                  <small>{getServiceTitle(booking.serviceId)}</small>
+                </div>
+                <div className="admin-booking-meta">
+                  <span className={`admin-booking-status ${booking.status}`}>{booking.status}</span>
+                  <small>{booking.slotId ? `${formatDate(booking.slotId.startAt)} · ${formatTime(booking.slotId.startAt)}` : "Slot pending"}</small>
+                  <small>{booking.paymentStatus ? `Payment: ${booking.paymentStatus}` : "Payment not started"}</small>
+                  <small>{formatPrice(booking.amount)}</small>
+                </div>
+              </div>
+            )) : <p className="dashboard-muted">No transactions yet.</p>}
+          </div>
         </section>
 
         <section className="admin-brief-row">

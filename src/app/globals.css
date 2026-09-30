@@ -677,6 +677,9 @@ button:focus-visible, a:focus-visible, summary:focus-visible {
 .admin-booking-row small { display: block; color: var(--muted); font-size: 12px; }
 .admin-booking-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
 .admin-booking-status { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.admin-transactions-panel { margin-top: 18px; }
+.admin-transactions-list { margin-top: 8px; }
+.admin-transaction-row { align-items: center; }
 .admin-booking-status.confirmed { background: #dfe9df; color: #24553a; }
 .admin-booking-status.pending_payment { background: #f0e2cf; color: #855b16; }
 .admin-booking-status.awaiting_coach_slot { background: #ebdeef; color: #635070; }

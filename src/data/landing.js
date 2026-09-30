@@ -223,6 +223,6 @@ export const faqs = [
   },
   {
     question: "What happens after I book?",
-    answer: "The planned flow will confirm your session and share the online meeting details. Booking confirmation and payment are not active on this page yet.",
+    answer: "Once your payment is confirmed, your booking appears in your dashboard. If Talat is arranging your session time, he will follow up; meeting details appear when they are ready.",
   },
 ];

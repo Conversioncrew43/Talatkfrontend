@@ -47,6 +47,7 @@ export default function BookingFlow() {
   const [phone, setPhone] = useState("");
   const [user, setUser] = useState(null);
   const [booking, setBooking] = useState(null);
+  const [paymentPending, setPaymentPending] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [serviceError, setServiceError] = useState("");
@@ -88,6 +89,7 @@ export default function BookingFlow() {
     setPhone(saved.phone || "");
     setUser(saved.user || null);
     setBooking(saved.booking || null);
+    setPaymentPending(Boolean(saved.paymentPending));
 
     const preferredService = new URLSearchParams(window.location.search).get("service");
     apiRequest("/services")
@@ -107,8 +109,8 @@ export default function BookingFlow() {
 
   useEffect(() => {
     if (!hydrated) return;
-    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ serviceId, slotId, coachWillAssignSlot, dateKey, stage, email, challengeId, name, phone, user, booking }));
-  }, [hydrated, serviceId, slotId, coachWillAssignSlot, dateKey, stage, email, challengeId, name, phone, user, booking]);
+    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ serviceId, slotId, coachWillAssignSlot, dateKey, stage, email, challengeId, name, phone, user, booking, paymentPending }));
+  }, [hydrated, serviceId, slotId, coachWillAssignSlot, dateKey, stage, email, challengeId, name, phone, user, booking, paymentPending]);
 
   useEffect(() => {
     if (!serviceId) return;
@@ -210,6 +212,29 @@ export default function BookingFlow() {
     }
   }
 
+  async function checkPaymentStatus() {
+    setBusy(true);
+    setError("");
+    try {
+      const result = await apiRequest(`/payments/status/${booking._id}`, { token: accountToken });
+      setBooking(result.booking);
+      if (result.paid) {
+        setPaymentPending(false);
+        setStage("success");
+      } else if (result.booking.paymentStatus === "failed") {
+        setPaymentPending(false);
+        setError("The payment was not completed. You can try again.");
+      } else {
+        setPaymentPending(true);
+        setError("Your payment is still being confirmed. Please check again shortly.");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function payAndConfirm() {
     setBusy(true);
     setError("");
@@ -239,7 +264,22 @@ export default function BookingFlow() {
               token: accountToken,
               body: JSON.stringify({ bookingId: booking._id, ...paymentResult }),
             });
-            if (!verified.paid) throw new Error(verified.message || "Payment is still processing. Please check again shortly.");
+            if (!verified.paid) {
+              const status = await apiRequest(`/payments/status/${booking._id}`, { token: accountToken });
+              setBooking(status.booking);
+              if (status.paid) {
+                setPaymentPending(false);
+                setStage("success");
+              } else if (status.booking.paymentStatus === "failed") {
+                setPaymentPending(false);
+                setError("The payment was not completed. You can try again.");
+              } else {
+                setPaymentPending(true);
+                setError(verified.message || "Your payment is still being confirmed. Please check again shortly.");
+              }
+              return;
+            }
+            setPaymentPending(false);
             setBooking(verified.booking);
             setStage("success");
           } catch (err) {
@@ -415,7 +455,11 @@ export default function BookingFlow() {
                 <div><dt>Your email</dt><dd>{user?.email || email}</dd></div>
               </dl>
               <div className="booking-total"><span>Total</span><strong>{formatPrice(booking?.amount ?? service?.price)}</strong></div>
-              <button className="booking-primary" disabled={busy} onClick={payAndConfirm} type="button">{busy ? "Preparing secure payment…" : "Confirm & pay"}<ArrowRight size={17} /></button>
+              {paymentPending ? (
+                <button className="booking-primary" disabled={busy} onClick={checkPaymentStatus} type="button">{busy ? "Checking payment…" : "Check payment status"}<ArrowRight size={17} /></button>
+              ) : (
+                <button className="booking-primary" disabled={busy} onClick={payAndConfirm} type="button">{busy ? "Preparing secure payment…" : "Confirm & pay"}<ArrowRight size={17} /></button>
+              )}
               <p className="booking-privacy"><LockKeyhole size={14} /> Secure payment powered by Razorpay.</p>
             </div>
           )}

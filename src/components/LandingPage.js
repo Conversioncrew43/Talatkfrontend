@@ -40,11 +40,11 @@ import {
   coachingMethod,
   faqs,
   navigation,
-  sessions,
   steps,
   testimonials,
   trustPoints,
 } from "@/data/landing";
+import { apiRequest, formatPrice } from "@/lib/api";
 
 const iconSet = {
   AudioLines,
@@ -122,6 +122,7 @@ function Navbar() {
           {navigation.map((item) => (
             <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)}>{item.label}</a>
           ))}
+          <Link className="nav-login" href="/login" onClick={() => setMenuOpen(false)}><UserRound size={16} /> Login</Link>
           <BookLink className="nav-mobile-book" />
         </nav>
         <BookLink className="nav-book" />
@@ -403,7 +404,7 @@ function HowItWorks() {
   );
 }
 
-function Sessions() {
+function Sessions({ services }) {
   return (
     <section className="sessions-section section-pad" id="sessions">
       <div className="section-wrap">
@@ -412,20 +413,20 @@ function Sessions() {
           <p className="sessions-side-note">Every session is one-to-one, online, and shaped around you.</p>
         </div>
         <div className="session-grid">
-          {sessions.map((session, index) => (
-            <article className={`session-card${session.featured ? " session-card-featured" : ""}`} key={session.name} data-reveal>
-              {session.featured && <div className="popular-tag"><Sparkles size={13} aria-hidden="true" /> A DEEPER DIVE</div>}
+          {services === null ? <p className="catalog-loading">Loading current sessions…</p> : services.map((service, index) => (
+            <article className={`session-card${index === 1 ? " session-card-featured" : ""}`} key={service._id}>
+              {index === 1 && <div className="popular-tag"><Sparkles size={13} aria-hidden="true" /> A DEEPER DIVE</div>}
               <div className="session-number">SESSION / 0{index + 1}</div>
-              <h3>{session.name}</h3>
-              <p className="session-duration"><AudioLines size={15} aria-hidden="true" /> {session.duration} <span>·</span> Online</p>
-              <p className="session-description">{session.description}</p>
-              <div className="session-price"><span>{session.price}</span><small>per session</small></div>
-              <BookLink className={session.featured ? "session-book-featured" : "session-book"} serviceName={session.name}>Book this session</BookLink>
-              <p className="session-footnote">{session.note}</p>
+              <h3>{service.title}</h3>
+              <p className="session-duration"><AudioLines size={15} aria-hidden="true" /> {service.durationMinutes} minutes <span>·</span> Online</p>
+              <p className="session-description">{service.description}</p>
+              <div className="session-price"><span>{formatPrice(service.price)}</span><small>per session</small></div>
+              <BookLink className={index === 1 ? "session-book-featured" : "session-book"} serviceName={service.title}>Book this session</BookLink>
+              <p className="session-footnote">Available online</p>
             </article>
           ))}
         </div>
-        <p className="catalog-note">Displayed amounts mirror the backend seed catalog. Confirm against live service pricing before launch.</p>
+        <p className="catalog-note">Session details and pricing are updated from the live catalog.</p>
       </div>
     </section>
   );
@@ -530,6 +531,16 @@ function Footer() {
 }
 
 export default function LandingPage() {
+  const [liveServices, setLiveServices] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    apiRequest("/services")
+      .then(({ services: list }) => active && setLiveServices(list))
+      .catch(() => active && setLiveServices([]));
+    return () => { active = false; };
+  }, []);
+
   useEffect(() => {
     document.documentElement.classList.add("has-js");
     const elements = document.querySelectorAll("[data-reveal]");
@@ -560,7 +571,7 @@ export default function LandingPage() {
         <CoachSection />
         <CoachingAreas />
         <HowItWorks />
-        <Sessions />
+        <Sessions services={liveServices} />
         <Testimonials />
         <VisualCTA />
         <FAQ />

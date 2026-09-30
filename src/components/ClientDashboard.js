@@ -22,6 +22,10 @@ export default function ClientDashboard() {
     Promise.all([apiRequest("/auth/me", { token }), apiRequest("/bookings/me", { token })])
       .then(([account, result]) => {
         if (!active) return;
+        if (account.user?.role === "admin") {
+          window.location.assign("/admin");
+          return;
+        }
         setUser(account.user);
         setBookings(result.bookings || []);
       })
@@ -72,7 +76,10 @@ export default function ClientDashboard() {
           <Image src="/images/Logo_fnal-removebg-preview.png" alt="" width={500} height={500} priority />
           <span>Talat K<small>YOUR COACHING SPACE</small></span>
         </Link>
-        <button className="dashboard-signout" type="button" onClick={signOut}><LogOut size={16} /> Sign out</button>
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          {user?.role === "admin" && <Link className="booking-back-site" href="/admin">Admin dashboard</Link>}
+          <button className="dashboard-signout" type="button" onClick={signOut}><LogOut size={16} /> Sign out</button>
+        </div>
       </header>
 
       <div className="dashboard-content">

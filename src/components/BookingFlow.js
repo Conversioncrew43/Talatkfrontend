@@ -436,8 +436,8 @@ export default function BookingFlow() {
               <p>Your email is verified. Add just your name to continue with this booking.</p>
               <label htmlFor="booking-name">Your name</label>
               <input className="booking-text-input" id="booking-name" autoComplete="name" placeholder="First and last name" required value={name} onChange={(event) => setName(event.target.value)} />
-              <label htmlFor="booking-phone">Phone <span>Optional</span></label>
-              <input className="booking-text-input" id="booking-phone" type="tel" autoComplete="tel" placeholder="Add a contact number" value={phone} onChange={(event) => setPhone(event.target.value)} />
+              <label htmlFor="booking-phone">Phone</label>
+              <input className="booking-text-input" id="booking-phone" type="tel" autoComplete="tel" placeholder="Add a contact number" required value={phone} onChange={(event) => setPhone(event.target.value)} />
               <button className="booking-primary" disabled={busy} type="submit">{busy ? "Creating your account…" : "Continue to booking"}<ArrowRight size={17} /></button>
             </form>
           )}
